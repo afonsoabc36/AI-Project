@@ -56,12 +56,20 @@ def main():
             elif saida == 6:
                 inicio = input("Nodo inicial -> ")
                 fim = input("Nodo final -> ")
-                print(g.procura_DFS(inicio, fim, path=[], visited=set()))
+                sol, custo = g.procura_DFS(inicio, fim, path=[], visited=set())
+                print(sol, custo)
+                print(f"Bicileta: {custo / 10}")
+                print(f"Mota: {custo / 35}")
+                print(f"Carro: {custo / 50}")
                 l = input("Prima Enter para continuar")
             elif saida == 7:
                 inicio = input("Nodo inicial -> ")
                 fim = input("Nodo final -> ")
-                print(g.procura_BFS(inicio, fim))
+                sol, custo = g.procura_BFS(inicio, fim)
+                print(sol, custo)
+                print(f"Bicileta: {custo / 10}")
+                print(f"Mota: {custo / 35}")
+                print(f"Carro: {custo / 50}")
                 l = input("Prima Enter para continuar")
             elif saida == 8:
                 inicio = input("Nodo inicial -> ")

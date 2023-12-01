@@ -1,24 +1,31 @@
 """
 Como usar a classe:
-bicycle = Vehicle("Bicycle", 5, 10)
-motorcycle = Vehicle("Motorcycle", 20, 35)
-car = Vehicle("Car", 100, 50)
+bicycle = Vehicle("Bicycle")
+motorcycle = Vehicle("Motorcycle")
+car = Vehicle("Car")
 """
 
 
 class Vehicle:
 
-    def __init__(self, type, maxWeight, averageSpeed):
-        self.type = type  # Tipo de veículo, "Bicycle", "Motorcycle", "Car"
-        self.maxWeight = maxWeight  # Peso máximo que o veículo pode levar (Em kg)
-        self.averageSpeed = averageSpeed  # Velocidade média do veículo
+    def __init__(self, vehicleType):
+        self.vehicleType = vehicleType  # Tipo de veículo, "Bicycle", "Motorcycle", "Car"
+        if self.vehicleType == "Bicycle":
+            self.maxWeight = 5
+            self.averageSpeed = 10
+        elif self.vehicleType == "Motorcycle":
+            self.maxWeight = 20
+            self.averageSpeed = 35
+        else:  # self.vehicleType == "Car"
+            self.maxWeight = 100
+            self.averageSpeed = 50
 
     # Velocidade do veículo ajustada ao peso das encomendas que leva
     def effectiveSpeed(self, packageWeight):
         effectiveSpeed = self.averageSpeed
-        if self.type == "Bicycle":
+        if self.vehicleType == "Bicycle":
             effectiveSpeed -= (packageWeight * 0.6)
-        elif self.type == "Motorcycle":
+        elif self.vehicleType == "Motorcycle":
             effectiveSpeed -= (packageWeight * 0.5)
         else:  # self.type == "Car"
             effectiveSpeed -= (packageWeight * 0.1)

@@ -4,6 +4,7 @@ import math
 import csv
 import os
 from Node import Node
+from Vehicle import Vehicle
 from queue import Queue
 
 
@@ -25,13 +26,13 @@ class Graph:
     def add_edge(self, node1, node2, weight):
         n1 = Node(node1)
         n2 = Node(node2)
-        if (n1 not in self.m_nodes):
+        if n1 not in self.m_nodes:
             self.m_nodes.append(n1)
             self.m_graph[node1] = set()
         else:
             n1 = self.get_node_by_name(node1)
 
-        if (n2 not in self.m_nodes):
+        if n2 not in self.m_nodes:
             self.m_nodes.append(n2)
             self.m_graph[node2] = set()
         else:
@@ -86,9 +87,8 @@ class Graph:
     def heuristica(self):
         nodos = self.m_graph.keys()
         for n in nodos:
-            self.m_h[
-                n] = 1  # define a heuristica para cada nodo como 1, armazenado essa informação num dicionário chamado self.m_h
-        return True  # (True) a atribuição de heuristica foi concluida co sucesso
+            self.m_h[n] = 1  # define a heuristica para cada nodo como 1
+        return True  # A atribuição de heuristica foi concluida co sucesso
 
     def getH(self, node):
         return self.m_h[node]
@@ -119,6 +119,9 @@ class Graph:
             custo = custo + self.get_arc_cost(teste[i], teste[i + 1])
             i = i + 1
         return custo
+
+    def calculaTempoVeiculo(self, caminho, veiculo, package):
+        return self.calcula_custo(caminho) * veiculo.effectiveSpeed(package.getWeight())  # TODO: Change the 1
 
     def imprime_aresta(self):
         listaA = ""
@@ -210,7 +213,7 @@ class Graph:
     ######################################################
 
     def procura_Greedy(self, start, end):
-        open_list = set([start])  # lista de nodos visitado mas com vizinhos que ainda não foram vizitados
+        open_list = set([start])  # lista de nodos visitados, mas com vizinhos que ainda não foram visitados
         closed_list = set([])  # lista de nodos visitados
         parents = {}  # dicionário que mantem o antecessor de um nodo
         parents[start] = start
@@ -254,7 +257,7 @@ class Graph:
 
         # g contains current distances from start_node to all other nodes
         # the default value (if it's not found in the map) is +infinity
-        g = {}  # g é apra substiruir pelo peso  ???
+        g = {}  # g é para substiruir pelo peso  ???
 
         g[start] = 0
 

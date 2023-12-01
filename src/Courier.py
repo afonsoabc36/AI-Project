@@ -1,7 +1,9 @@
 class Courier:
 
-    def __init__(self, id=-1, ratingValue=0, deliveries=None, numberRatings=0):
+    def __init__(self, name, vehicle, id=-1, ratingValue=0, numberRatings=0, deliveries=None):
         self.id = id
+        self.name = name
+        self.vehicle = vehicle
         self.ratingValue = ratingValue
         self.numberRatings = numberRatings
         self.deliveries = deliveries if deliveries is not None else []
@@ -18,6 +20,12 @@ class Courier:
     # Substitui a lista de deliveries por uma lista nova
     def setDeliveries(self, deliveries):
         self.deliveries = deliveries
+
+    def setVehicle(self, vehicle):
+        self.vehicle = vehicle
+
+    def getVehicle(self):
+        return self.vehicle
 
     # Adiciona uma lista de deliveries à lista existente
     def addDeliveries(self, deliveries):
