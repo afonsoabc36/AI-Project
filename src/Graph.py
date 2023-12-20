@@ -6,6 +6,7 @@ import os
 from Node import Node
 from Vehicle import Vehicle
 from queue import Queue
+from queue import PriorityQueue
 
 
 class Graph:
@@ -245,7 +246,7 @@ class Graph:
 
     #####################################################
     # Procura A*
-    ######################################################
+    #####################################################
 
     def procura_aStar(self, start, end):
         # open_list is a list of nodes which have been visited, but who's neighbors
@@ -257,7 +258,7 @@ class Graph:
 
         # g contains current distances from start_node to all other nodes
         # the default value (if it's not found in the map) is +infinity
-        g = {}  # g é para substiruir pelo peso  ???
+        g = {}
 
         g[start] = 0
 
@@ -320,3 +321,152 @@ class Graph:
 
         print('Path does not exist!')
         return None
+
+    #####################################################
+    # Custo Uniforme
+    #####################################################
+
+    def procura_custoUniforme(self, start, end):
+        # Priority queue for UCS
+        priority_queue = PriorityQueue()
+
+        # Enqueue the start node with cost 0
+        priority_queue.put((0, start))
+
+        # Initialize visited set
+        visited = set()
+
+        # Dictionary to store the cost to reach each node along with the previous node
+        cost_so_far = {start: (0, None)}
+
+        while not priority_queue.empty():
+            # Dequeue the node with the lowest cost
+            current_cost, current_node = priority_queue.get()
+
+            # Check if the goal node is reached
+            if current_node == end:
+                # Reconstruct the path
+                path = [current_node]
+                while current_node != start:
+                    current_node = cost_so_far[current_node][1]
+                    path.append(current_node)
+                path.reverse()
+                return path, current_cost
+
+            # Mark the current node as visited
+            visited.add(current_node)
+
+            # Explore neighbors
+            for neighbor, weight in self.getNeighbours(current_node):
+                new_cost = current_cost + weight
+
+                # Check if the neighbor is not visited or has a lower cost
+                if neighbor not in visited or new_cost < cost_so_far[neighbor][0]:
+                    # Update cost and enqueue the neighbor
+                    cost_so_far[neighbor] = (new_cost, current_node)
+                    priority_queue.put((new_cost, neighbor))
+
+        print('Path does not exist!')
+        return None
+
+    #####################################################
+    # Iterative DFS
+    #####################################################
+
+    def procura_iterativeDFS(self, start, end, max_depth=100):
+        for depth_limit in range(1, max_depth + 1):
+            result = self.DFS_recursive(start, end, depth_limit, set())
+            if result is not None:
+                path, cost = result
+                return path, cost
+
+        print(f'Path does not exist within the depth limit of {max_depth}.')
+        return None
+
+    def DFS_recursive(self, current_node, end, depth_limit, visited):
+        if current_node == end:
+            return ([current_node], 0)
+
+        if depth_limit == 0:
+            return None
+
+        visited.add(current_node)
+
+        for neighbor, weight in self.getNeighbours(current_node):
+            if neighbor not in visited:
+                result = self.DFS_recursive(neighbor, end, depth_limit - 1, visited)
+                if result is not None:
+                    path, cost = result
+                    return ([current_node] + path, cost + weight)
+
+        return None
+
+    #####################################################
+    # Iterative A*
+    #####################################################
+
+    def procura_iterativeAStar(self, start, end, max_depth=100):
+        for depth_limit in range(1, max_depth + 1):
+            result = self.aStar_recursive(start, start, end, depth_limit, set())
+            if result is not None:
+                path, cost = result
+                return path, cost
+
+        print(f'Path does not exist within the depth limit of {max_depth}.')
+        return None
+
+    def aStar_recursive(self, start, current_node, end, depth_limit, visited):
+        # Local dictionary to keep track of parents
+        parent = {}
+
+        def reconstruct_path(node):
+            path = [node]
+            while node != start:
+                node = parent[node]
+                path.append(node)
+            path.reverse()
+            return path
+
+        if current_node == end:
+            return reconstruct_path(current_node), 0
+
+        if depth_limit == 0:
+            return None
+
+        visited.add(current_node)
+
+        # Calculate the heuristic value for the current node
+        h_value = self.getH(current_node)
+
+        # Priority queue to prioritize nodes with lower f values (g + h)
+        priority_queue = PriorityQueue()
+        priority_queue.put((0 + h_value, 0, current_node))
+
+        while not priority_queue.empty():
+            f_value, g_value, node = priority_queue.get()
+
+            if node == end:
+                # Reconstruct the path and return
+                return reconstruct_path(node), g_value
+
+            visited.add(node)
+
+            for neighbor, weight in self.getNeighbours(node):
+                if neighbor not in visited:
+                    # Calculate the heuristic value for the neighbor
+                    h_value_neighbor = self.getH(neighbor)
+                    # Calculate the new g value
+                    new_g_value = g_value + weight
+                    # Calculate the new f value
+                    new_f_value = new_g_value + h_value_neighbor
+
+                    # Add the neighbor to the priority queue with the new f value
+                    priority_queue.put((new_f_value, new_g_value, neighbor))
+                    # Update the parent of the neighbor in the local dictionary
+                    parent[neighbor] = node
+
+        return None
+
+    #####################################################
+    # Ver se faz sentido ter mais algum
+    #####################################################

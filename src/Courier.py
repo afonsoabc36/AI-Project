@@ -1,15 +1,31 @@
 class Courier:
 
-    def __init__(self, name, vehicle, id=-1, ratingValue=0, numberRatings=0, deliveries=None):
-        self.id = id
+    def __init__(self, name, vehicle, number=-1, ratingValue=0, numberRatings=0, deliveries=None):
+        self.number = number
         self.name = name
+        self.free = True
         self.vehicle = vehicle
         self.ratingValue = ratingValue
         self.numberRatings = numberRatings
         self.deliveries = deliveries if deliveries is not None else []
 
-    def getId(self):
-        return self.id
+    def getNumber(self):
+        return self.number
+
+    def getName(self):
+        return self.name
+
+    def setName(self,name):
+        self.name = name
+
+    def setFree(self):
+        self.free = True
+
+    def setBusy(self):
+        self.free = False
+
+    def getFree(self):
+        return self.free
 
     def getRating(self):
         return self.ratingValue
