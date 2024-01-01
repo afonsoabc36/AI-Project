@@ -152,6 +152,50 @@ class Graph:
         plt.draw()
         plt.show()
 
+    def getFastestOption(self, destination):
+        # Initialize variables to keep track of the best solution and cost
+        bestSol = None
+        bestCusto = float('inf')  # Initialize with positive infinity
+
+        # Check DFS
+        sol, custo = self.procura_DFS(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check BFS
+        sol, custo = self.procura_BFS(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check Greedy
+        sol, custo = self.procura_Greedy(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check A* (replace with your actual arguments)
+        sol, custo = self.procura_aStar(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check Uniform Cost (replace with your actual arguments)
+        sol, custo = self.procura_custoUniforme(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check Iterative DFS (replace with your actual arguments)
+        sol, custo = self.procura_iterativeDFS(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Check Iterative A* (replace with your actual arguments)
+        sol, custo = self.procura_iterativeAStar(destination, 'Gualtar')
+        if custo < bestCusto:
+            bestSol, bestCusto = sol, custo
+
+        # Return the best solution and cost
+        return bestSol, bestCusto
+
+
     ######################################################
     # Procura DFS
     ######################################################
@@ -349,9 +393,24 @@ class Graph:
                 # Reconstruct the path
                 path = [current_node]
                 while current_node != start:
-                    current_node = cost_so_far[current_node][1]
+                    print("Current node: ", current_node)
+                    print("Path: ", path)
+                    print("Cost_so_far:", ', '.join(f'{key}: {value}' for key, value in cost_so_far.items()))
+                    # Ensure that the current_node is in cost_so_far before trying to access it
+                    if current_node not in cost_so_far:
+                        print('Node not found in cost_so_far! Path contains a cycle. Removing from cost_so_far.')
+                        return None
+                    aux = True
+                    while aux:
+                        current_node = cost_so_far[current_node][1]
+                        if current_node in path:
+                            del cost_so_far[current_node]
+                        else:
+                            aux = False
                     path.append(current_node)
                 path.reverse()
+                print(path)
+                print(current_cost)
                 return path, current_cost
 
             # Mark the current node as visited
@@ -360,12 +419,11 @@ class Graph:
             # Explore neighbors
             for neighbor, weight in self.getNeighbours(current_node):
                 new_cost = current_cost + weight
-
-                # Check if the neighbor is not visited or has a lower cost
-                if neighbor not in visited or new_cost < cost_so_far[neighbor][0]:
+                if neighbor not in visited:
                     # Update cost and enqueue the neighbor
                     cost_so_far[neighbor] = (new_cost, current_node)
                     priority_queue.put((new_cost, neighbor))
+                    visited.add(neighbor)
 
         print('Path does not exist!')
         return None

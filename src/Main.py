@@ -9,18 +9,20 @@ from Node import Node
 class Main:
     def __init__(self):
         self.graph = Graph()
+        self.graph.loadFromFile('braga.csv')
         self.couriers = loadCouriers()
         self.packages = loadPackages()
 
     def mainPanel(self):
         saida = -1
         while saida != 0:
-            print("1-Carregar Grafo")
+            print("1-Carregar outro grafo")
             print("2-Opções sobre o grafo")
             print("3-Algoritmos de procura")
             print("4-Imprimir estafetas")
             print("5-Imprimir pacotes")
             print("6-Associar encomendas a um estafeta")
+            print("7-Entregar uma encomenda")
             print("0-Sair")
 
             try:
@@ -144,6 +146,33 @@ class Main:
                             print("ID inválido, insira novamente")
                     self.couriers[courierID].addDeliveries(packagesToInsert)
                     print("Pacotes associados ao estafeta")
+                elif saida == 7:
+                    print("Insira o ID do estafeta:")
+                    for courier in self.couriers.values():
+                        print(courier)
+                    aux = True
+                    while aux:
+                        courierID = int(input())
+                        if courierID in self.couriers.keys():
+                            aux = False
+                        else:
+                            print("ID inválido, insira novamente")
+                    print("Insira o ID da encomenda:")
+                    courierDeliveries = self.couriers.get(courierID).getDeliveries()
+                    for package in courierDeliveries:
+                        print(package)
+                    aux = True
+                    while aux:
+                        packageID = int(input())
+                        if packageID in courierDeliveries:
+                            aux = False
+                        else:
+                            print("ID inválido, insira novamente")
+                    # TODO: GetFastestOption
+                    # TODO: GetLessConsumingOption
+                    # TODO: Add other packages that are on the way, if location in sol = [node]
+                    # TODO: Add check for bad input, if not an int
+                    # TODO: When delivered, add a price depending on the rush and the delivery method
                 else:
                     print("Opção Inválida...")
                     l = input("Prima Enter para continuar")
