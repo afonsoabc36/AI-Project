@@ -393,12 +393,9 @@ class Graph:
                 # Reconstruct the path
                 path = [current_node]
                 while current_node != start:
-                    print("Current node: ", current_node)
-                    print("Path: ", path)
-                    print("Cost_so_far:", ', '.join(f'{key}: {value}' for key, value in cost_so_far.items()))
                     # Ensure that the current_node is in cost_so_far before trying to access it
                     if current_node not in cost_so_far:
-                        print('Node not found in cost_so_far! Path contains a cycle. Removing from cost_so_far.')
+                        print('Node not found.')
                         return None
                     aux = True
                     while aux:
@@ -409,8 +406,6 @@ class Graph:
                             aux = False
                     path.append(current_node)
                 path.reverse()
-                print(path)
-                print(current_cost)
                 return path, current_cost
 
             # Mark the current node as visited
@@ -466,7 +461,7 @@ class Graph:
 
     def procura_iterativeAStar(self, start, end, max_depth=100):
         for depth_limit in range(1, max_depth + 1):
-            result = self.aStar_recursive(start, start, end, depth_limit, set())
+            result = self.aStar_recursive(start, start, end, depth_limit)
             if result is not None:
                 path, cost = result
                 return path, cost
@@ -474,17 +469,30 @@ class Graph:
         print(f'Path does not exist within the depth limit of {max_depth}.')
         return None
 
-    def aStar_recursive(self, start, current_node, end, depth_limit, visited):
-        # Local dictionary to keep track of parents
+    def aStar_recursive(self, start, current_node=None, end=None, depth_limit=100, visited=None):
+        # Initialize visited set and depth_limit
+        if visited is None:
+            visited = set()
+
+        # Local dictionary to keep track of parents and g_values
         parent = {}
 
         def reconstruct_path(node):
             path = [node]
             while node != start:
-                node = parent[node]
+                if node not in parent:
+                    print('Error: Node not found in parent dictionary during path reconstruction.')
+                    return None
+                node = parent[node][0]
                 path.append(node)
             path.reverse()
             return path
+
+        # Set initial values for start and end
+        if current_node is None:
+            current_node = start
+        if end is None:
+            end = start
 
         if current_node == end:
             return reconstruct_path(current_node), 0
@@ -519,10 +527,12 @@ class Graph:
                     # Calculate the new f value
                     new_f_value = new_g_value + h_value_neighbor
 
-                    # Add the neighbor to the priority queue with the new f value
-                    priority_queue.put((new_f_value, new_g_value, neighbor))
-                    # Update the parent of the neighbor in the local dictionary
-                    parent[neighbor] = node
+                    # Check if the neighbor is not in the parent dictionary or has a lower g value
+                    if neighbor not in parent or new_g_value < parent[neighbor][1]:
+                        # Add the neighbor to the priority queue with the new f value
+                        priority_queue.put((new_f_value, new_g_value, neighbor))
+                        # Update the parent of the neighbor in the local dictionary with both node and g_value
+                        parent[neighbor] = (node, new_g_value)
 
         return None
 

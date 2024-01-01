@@ -23,6 +23,7 @@ class Main:
             print("5-Imprimir pacotes")
             print("6-Associar encomendas a um estafeta")
             print("7-Entregar uma encomenda")
+            print("8-Teste")
             print("0-Sair")
 
             try:
@@ -173,6 +174,13 @@ class Main:
                     # TODO: Add other packages that are on the way, if location in sol = [node]
                     # TODO: Add check for bad input, if not an int
                     # TODO: When delivered, add a price depending on the rush and the delivery method
+                elif saida == 8:
+                    for node in self.graph.getNodes():
+                        if node.getName == 'Gualtar':
+                            pass
+                        else:
+                            sol, cost = self.graph.procura_custoUniforme(node.getName(), 'Gualtar')
+                            print((node.getName(), cost))
                 else:
                     print("Opção Inválida...")
                     l = input("Prima Enter para continuar")
