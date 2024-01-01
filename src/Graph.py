@@ -68,7 +68,8 @@ class Graph:
                 elif not adding_edges and len(row) == 2:
                     # Assuming it's the second format (Node, Heuristica)
                     node, heuristica = row
-                    self.add_heuristica(node, int(heuristica))
+                    if heuristica != "":
+                        self.add_heuristica(node, int(heuristica))
                 else:
                     print(f"Ignoring invalid row: {row}")
 
@@ -89,7 +90,7 @@ class Graph:
         nodos = self.m_graph.keys()
         for n in nodos:
             self.m_h[n] = 1  # define a heuristica para cada nodo como 1
-        return True  # A atribuição de heuristica foi concluida co sucesso
+        return True  # A atribuição de heuristica foi concluida com sucesso
 
     def getH(self, node):
         return self.m_h[node]
@@ -112,7 +113,7 @@ class Graph:
         return custoT
 
     def calcula_custo(self, caminho):
-        # caminho Ã© uma lista de nodes
+        # caminho até uma lista de nodes
         teste = caminho
         custo = 0
         i = 0
@@ -128,7 +129,7 @@ class Graph:
         listaA = ""
         for nodo in self.m_graph.keys():
             for (nodo2, custo) in self.m_graph[nodo]:
-                listaA = listaA + nodo + "->" + nodo2 + "custo:" + str(custo) + ("/n")
+                listaA = listaA + nodo + " -> " + nodo2 + "  custo: " + str(custo) + ("\n")
         return listaA
 
     def desenha(self):

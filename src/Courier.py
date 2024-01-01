@@ -9,6 +9,9 @@ class Courier:
         self.numberRatings = numberRatings
         self.deliveries = deliveries if deliveries is not None else []
 
+    def __str__(self):
+        return f"Courier {self.number}: {self.name}; Rating: {self.ratingValue}"
+
     def getNumber(self):
         return self.number
 
