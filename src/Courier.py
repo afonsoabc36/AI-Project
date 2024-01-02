@@ -7,7 +7,7 @@ class Courier:
         self.vehicle = vehicle
         self.ratingValue = ratingValue
         self.numberRatings = numberRatings
-        self.deliveries = deliveries if deliveries is not None else []
+        self.deliveries = deliveries if deliveries is not None else {}
 
     def __str__(self):
         return f"Courier {self.number}: {self.name}; Rating: {self.ratingValue}"
@@ -48,7 +48,7 @@ class Courier:
 
     # Adiciona uma lista de deliveries à lista existente
     def addDeliveries(self, deliveries):
-        self.deliveries.extend(deliveries)
+        self.deliveries.update(deliveries)
 
     # Adiciona uma delivery à lista existente
     def addDelivery(self, delivery):

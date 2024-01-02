@@ -12,7 +12,7 @@ from queue import PriorityQueue
 class Graph:
 
     def __init__(self, directed=False):
-        # self.m_num_of_nodes = num_of_nodes
+        self.m_name = 'braga.csv'
         self.m_nodes = []
         self.m_directed = directed
         self.m_graph = {}
@@ -23,6 +23,12 @@ class Graph:
         for key in self.m_graph.keys():
             out = out + "node" + str(key) + ": " + str(self.m_graph[key]) + "/n"
         return out
+
+    def getName(self):
+        return self.m_name
+
+    def setName(self, name):
+        self.m_name = name
 
     def add_edge(self, node1, node2, weight):
         n1 = Node(node1)
@@ -122,8 +128,13 @@ class Graph:
             i = i + 1
         return custo
 
-    def calculaTempoVeiculo(self, caminho, veiculo, package):
-        return self.calcula_custo(caminho) * veiculo.effectiveSpeed(package.getWeight())  # TODO: Change the 1
+    def calculaTempoVeiculo(self, sol, veiculo, packages, stops=1):
+        weight = 0
+        # TODO: Calcular o n de paragens através do sol e dos packages
+        for package in packages:
+            weight += package.getWeight()
+        return self.calcula_custo(sol) / veiculo.effectiveSpeed(weight) + (0.033 * stops)  # 2 minutos por paragem
+        # TODO: Retorna -1 se o peso for demasiado para o tipo de veículo
 
     def imprime_aresta(self):
         listaA = ""

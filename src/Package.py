@@ -4,7 +4,7 @@ class Package:
 
     def __init__(self, id, weight, volume, deliveryDate, destination, price=0):
         global packageId
-        self.id =id
+        self.id = id
         self.weight = weight
         self.volume = volume
         self.deliveryDate = deliveryDate

@@ -3,6 +3,7 @@ import csv
 from Graph import Graph
 from Courier import Courier
 from Package import Package
+from Vehicle import Vehicle
 from Node import Node
 
 
@@ -46,6 +47,7 @@ class Main:
                             if l in filesInGraphs:
                                 self.graph.loadFromFile(l)
                                 print("Loading was successful")
+                                self.graph.setName(l)
                                 l2 = input("Prima Enter para continuar")
                                 break
                             else:
@@ -124,14 +126,14 @@ class Main:
                     for package in self.packages.values():
                         print(package)
                     print("Insira o número das encomendas que quer associar 1 a 1, clique -1 para parar")
-                    packagesToInsert = []
+                    packagesToInsert = {}
                     aux = True
                     while aux:
                         packageNumber = int(input())
                         if packageNumber == -1:
                             aux = False
                         elif packageNumber in self.packages.keys():
-                            packagesToInsert.append(packageNumber)
+                            packagesToInsert[packageNumber] = self.packages.get(packageNumber)
                         else:
                             print("Pacote não existente")
                     print("Insira o ID do estafeta:")
@@ -159,17 +161,64 @@ class Main:
                             print("ID inválido, insira novamente")
                     print("Insira o ID da encomenda:")
                     courierDeliveries = self.couriers.get(courierID).getDeliveries()
-                    for package in courierDeliveries:
+                    for package in courierDeliveries.values():
                         print(package)
                     aux = True
                     while aux:
                         packageID = int(input())
-                        if packageID in courierDeliveries:
+                        if packageID in courierDeliveries.keys():
                             aux = False
                         else:
                             print("ID inválido, insira novamente")
-                    # TODO: GetFastestOption
-                    # TODO: GetLessConsumingOption
+
+                    packageToDeliver = self.packages.get(packageID)
+                    sol, cost = self.graph.procura_aStar(packageToDeliver.getDestination(), 'Gualtar')
+                    print(sol)
+                    sol.reverse()
+
+                    print("Melhor caminho: ", sol)
+                    print("Distância: ", cost, "km")
+
+                    delivery = [packageToDeliver]
+                    list = ["Car", "Motorcycle", "Bicycle"]
+
+                    aux = False
+                    for package in courierDeliveries.values():
+                        if package.getId() == packageID:
+                            continue
+                        if package.getDestination() in sol:
+                            aux = True
+                            break
+
+                    if aux:
+                        print("Deseja entregar outras encomendas pelo caminho?")
+                        print("1-Sim")
+                        print("0-Não")
+                        l = int(input())
+                        if l == 1:
+                            totalWeight = 0
+                            for package in courierDeliveries.values():
+                                if package.getPackageId() == packageID:
+                                    continue
+                                possibleWeight = totalWeight + package.getWeight()
+                                if package.getDestination() in sol and possibleWeight < Vehicle('Car').getTotalMaxWeight():
+                                    delivery.append(package)
+
+                            print(f"A entregar {len(delivery)} pacotes")
+
+                    for item in list:
+                        vehicle = Vehicle(item)
+                        time = self.graph.calculaTempoVeiculo(sol, vehicle, delivery)
+                        round(time, 2)
+                        hours = int(time)
+                        minutes = int((time - hours) * 60)
+                        print(f"Time with {item}: {hours}h{minutes}m")
+                        print(f"Cost of the trip: {vehicle.getTripCost(cost, time, 4.32)}")
+
+                    # print("Escolha mais rápida") -> Carro, transito 2x carro, não afeta mota nem bicicleta
+                    # print("Escolha mais económica") -> Fazer função que calcule os gastos, combustível + horas*salario
+                    # print("Escolha mais ecológica") -> Fazer função que atribua os valores
+                    # print("Entrega com um veículo em específico")
                     # TODO: Add other packages that are on the way, if location in sol = [node]
                     # TODO: Add check for bad input, if not an int
                     # TODO: When delivered, add a price depending on the rush and the delivery method
