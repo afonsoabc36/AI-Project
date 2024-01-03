@@ -15,6 +15,7 @@ class Main:
         self.packages = loadPackages()
         self.deliveredPackages = {}
         self.vehicleList = ['Bicycle', 'Motorcycle', 'Car']
+        self.courierWage = 4.32
 
     def mainPanel(self):
         saida = -1
@@ -26,6 +27,7 @@ class Main:
             print("5-Imprimir pacotes")
             print("6-Associar encomendas a um estafeta")
             print("7-Entregar uma encomenda")
+            print("8-Avaliar uma entrega")
             print("0-Sair")
 
             try:
@@ -111,10 +113,9 @@ class Main:
                             sol, cost = self.graph.procura_iterativeAStar(inicio, fim)
                         elif exit2 == 0:
                             break
+                        else:
+                            print()
                         print(sol, cost)
-                        print(f"Bicileta: {cost / 10}")
-                        print(f"Mota: {cost / 35}")
-                        print(f"Carro: {cost / 50}")
                     l = input("Prima Enter para continuar")
                 elif saida == 4:
                     for courier in self.couriers.values():
@@ -127,7 +128,7 @@ class Main:
                 elif saida == 6:
                     for package in self.packages.values():
                         print(package)
-                    print("Insira o número das encomendas que quer associar 1 a 1, clique -1 para parar")
+                    print("Insira o número das encomendas que quer associar 1 a 1, insira -1 para parar")
                     packagesToInsert = {}
                     aux = True
                     while aux:
@@ -138,18 +139,20 @@ class Main:
                             packagesToInsert[packageNumber] = self.packages.get(packageNumber)
                         else:
                             print("Pacote não existente")
-                    print("Insira o ID do estafeta:")
+                    print("Insira o ID do estafeta ou 0 para sair:")
                     for courier in self.couriers.values():
                         print(courier)
                     aux = True
                     while aux:
                         courierID = int(input())
-                        if courierID in self.couriers.keys():
+                        if courierID == 0:
+                            aux = False
+                        elif courierID in self.couriers.keys():
+                            self.couriers[courierID].addDeliveries(packagesToInsert)
+                            print("Pacotes associados ao estafeta")
                             aux = False
                         else:
                             print("ID inválido, insira novamente")
-                    self.couriers[courierID].addDeliveries(packagesToInsert)
-                    print("Pacotes associados ao estafeta")
                 elif saida == 7:
                     print("Insira o ID do estafeta:")
                     for courier in self.couriers.values():
@@ -163,6 +166,9 @@ class Main:
                             print("ID inválido, insira novamente")
                     print("Insira o ID da encomenda:")
                     courierDeliveries = self.couriers.get(courierID).getDeliveries()
+                    if len(courierDeliveries) == 0:
+                        print(f"Entregador {self.couriers.get(courierID).getName()} não tem encomendas associadas")
+                        break
                     for package in courierDeliveries.values():
                         print(package)
                     aux = True
@@ -203,86 +209,130 @@ class Main:
                                 possibleWeight = totalWeight + package.getWeight()
                                 if package.getDestination() in sol and possibleWeight < Vehicle('Car').getTotalMaxWeight():
                                     delivery.append(package)
-
-                            print(f"A entregar {len(delivery)} pacotes")
+                        tamanho = len(delivery)
+                        if tamanho > 1:
+                            print(f"A entregar {tamanho} pacotes")
+                        else:
+                            print(f"A entregar {tamanho} pacote")
 
                     data = {}
                     for item in self.vehicleList:
                         vehicle = Vehicle(item)
-                        time = self.graph.calculaTempoVeiculo(sol, vehicle, delivery)
-                        round(time, 2)
-                        tripCost = vehicle.getTripCost(cost, time, 4.32)
+                        time = round(self.graph.calculaTempoVeiculo(sol, vehicle, delivery), 2)
+                        tripCost = round(vehicle.getTripCost(cost, time, self.courierWage), 2)
                         data[item] = (time, tripCost)
                         hours = int(time)
                         minutes = int((time - hours) * 60)
                         print(f"Time with {item}: {hours}h{minutes}m")
                         print(f"Cost of the trip: {tripCost}")
 
-                    print("\n1-Escolha mais rápida") # Carro, transito 2x carro, não afeta mota nem bicicleta
-                    print("2-Escolha mais económica") # Fazer função que calcule os gastos, combustível + horas*salario
-                    print("3-Escolha ecológica") # Fazer função que atribua os valores
-                    print("4-Entrega com um veículo em específico")
-                    l = int(input())
                     vehicle = ""
                     deliveryWeight = 0
                     for pack in delivery:
                         deliveryWeight += pack.getWeight()
 
-                    if l == 1:
-                        minTime = float('inf')
-                        for key, (time, tripCost) in data.items():
-                            if time < minTime and Vehicle(key).canDeliver(deliveryWeight):
-                                vehicle = key
-                                minTime = time
-                    elif l == 2:
-                        minCost = float('inf')
-                        for key, (time, tripCost) in data.items():
-                            if tripCost < minCost and Vehicle(key).canDeliver(deliveryWeight):
-                                vehicle = key
-                                minCost = tripCost
-                    elif l == 3:
-                        carbonEmission = float('inf')
-                        vehicle = ""
-                        for item in self.vehicleList:
-                            choice = Vehicle(item)
-                            if choice.canDeliver(deliveryWeight):
-                                carbonTotal = choice.getCarbonEmission() * cost
-                                if carbonTotal < carbonEmission:
-                                    carbonEmission = carbonTotal
-                                    vehicle = item
-                    elif l == 4:
-                        print("Opções dispovíveis:")
-                        options = []
-                        for item in self.vehicleList:
-                            if Vehicle(item).canDeliver(deliveryWeight):
-                                print(item)
-                                options.append(item)
-                        print("Insira a sua escolha:")
-                        vehicle = input()
-                        if vehicle not in options:
-                            print(f"{vehicle} não existe, tente novamente")
-                            # Mandá-lo para trás
-                    else:
-                        print("Escolha inválida, tente novamente")
-                        # TODO: Mandá-lo de volta
+                    while True:
+                        print("\n1-Escolha mais rápida") # Carro, transito 2x carro, não afeta mota nem bicicleta
+                        print("2-Escolha mais económica") # Fazer função que calcule os gastos, combustível + horas*salario
+                        print("3-Escolha ecológica") # Fazer função que atribua os valores
+                        print("4-Entrega com um veículo em específico")
+                        l = int(input())
+
+                        if l == 1:
+                            minTime = float('inf')
+                            for key, (time, tripCost) in data.items():
+                                if time < minTime and Vehicle(key).canDeliver(deliveryWeight):
+                                    vehicle = key
+                                    minTime = time
+                            break
+                        elif l == 2:
+                            minCost = float('inf')
+                            for key, (time, tripCost) in data.items():
+                                if tripCost < minCost and Vehicle(key).canDeliver(deliveryWeight):
+                                    vehicle = key
+                                    minCost = tripCost
+                            break
+                        elif l == 3:
+                            carbonEmission = float('inf')
+                            vehicle = ""
+                            for item in self.vehicleList:
+                                choice = Vehicle(item)
+                                if choice.canDeliver(deliveryWeight):
+                                    carbonTotal = choice.getCarbonEmission() * cost
+                                    if carbonTotal < carbonEmission:
+                                        carbonEmission = carbonTotal
+                                        vehicle = item
+                            break
+                        elif l == 4:
+                            print("Opções dispovíveis:")
+                            options = []
+                            for item in self.vehicleList:
+                                if Vehicle(item).canDeliver(deliveryWeight):
+                                    print(item)
+                                    options.append(item)
+                            while True:
+                                print("Insira a sua escolha:")
+                                vehicle = input()
+                                if vehicle not in options:
+                                    print(f"{vehicle} não existe, tente novamente")
+                                else:
+                                    break
+                            break
+                        else:
+                            print("Escolha inválida, tente novamente")
 
                     print(f"A entregar a encomenda com {vehicle}, confirma?")
-                    print("1-Sim\n0-Não")
-                    l = int(input())
-                    if l == 1:
-                        self.deliver(delivery, courierID, vehicle)  # TODO: Definir a função deliver
-                    else:
-                        pass  # Voltar a escolher as coisas
+                    print("1-Sim")
+                    print("0-Não")
+                    while True:
+                        l = int(input())
+                        if l == 1:
+                            self.deliver(delivery, cost, courierID, vehicle)
+                            break
+                        elif l == 0:
+                            print("A cancelar a entrega")
+                            break
+                        else:
+                            print("Escolha inválida, tente novamente")
+                elif saida == 8:
+                    while True:
+                        print("Insira o número da encomenda a avaliar:")
+                        for package in self.deliveredPackages.values():
+                            if package.notReviewed():
+                                print(package)
+                        packageID = int(input())
+                        if packageID not in self.deliveredPackages.keys():
+                            print(f"Pacote {packageID} não existe, insira novamente")
+                            continue
+                        packageToReview = self.deliveredPackages.get(packageID)
 
+                        while True:
+                            print("Insira uma avaliação de 1 a 5 à entrega:")
+                            packageRating = int(input())
+                            if 1 <= packageRating <= 5:
+                                break
+                            else:
+                                print("Avaliação inválida, insira um número de 1 a 5")
 
-                    # TODO: Add check for bad input, if not an int
-                    # TODO: When delivered, add a price depending on the rush and the delivery method
+                        packageToReview.setRating(packageRating)
+                        self.couriers.get(packageToReview.getCourier()).updateRating(packageRating)
+                        break
                 else:
                     print("Opção Inválida...")
                     l = input("Prima Enter para continuar")
             except KeyboardInterrupt:
                 print("\nA sair...")
                 break
+            except ValueError:
+                print("Entrada inválida.")
+
+    def deliver(self, delivery, distance, courierID, vehicle):
+        for package in delivery:
+            packageID = package.getId()
+            self.packages.pop(packageID, None)
+            package.setPrice(distance, vehicle)
+            package.setCourier(courierID)
+            self.deliveredPackages[packageID] = package
 
 
 def loadCouriers():
