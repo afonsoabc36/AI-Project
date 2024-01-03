@@ -13,6 +13,8 @@ class Main:
         self.graph.loadFromFile('braga.csv')
         self.couriers = loadCouriers()
         self.packages = loadPackages()
+        self.deliveredPackages = {}
+        self.vehicleList = ['Bicycle', 'Motorcycle', 'Car']
 
     def mainPanel(self):
         saida = -1
@@ -173,14 +175,12 @@ class Main:
 
                     packageToDeliver = self.packages.get(packageID)
                     sol, cost = self.graph.procura_aStar(packageToDeliver.getDestination(), 'Gualtar')
-                    print(sol)
                     sol.reverse()
 
                     print("Melhor caminho: ", sol)
                     print("Distância: ", cost, "km")
 
                     delivery = [packageToDeliver]
-                    list = ["Car", "Motorcycle", "Bicycle"]
 
                     aux = False
                     for package in courierDeliveries.values():
@@ -206,20 +206,75 @@ class Main:
 
                             print(f"A entregar {len(delivery)} pacotes")
 
-                    for item in list:
+                    data = {}
+                    for item in self.vehicleList:
                         vehicle = Vehicle(item)
                         time = self.graph.calculaTempoVeiculo(sol, vehicle, delivery)
                         round(time, 2)
+                        tripCost = vehicle.getTripCost(cost, time, 4.32)
+                        data[item] = (time, tripCost)
                         hours = int(time)
                         minutes = int((time - hours) * 60)
                         print(f"Time with {item}: {hours}h{minutes}m")
-                        print(f"Cost of the trip: {vehicle.getTripCost(cost, time, 4.32)}")
+                        print(f"Cost of the trip: {tripCost}")
 
-                    # print("Escolha mais rápida") -> Carro, transito 2x carro, não afeta mota nem bicicleta
-                    # print("Escolha mais económica") -> Fazer função que calcule os gastos, combustível + horas*salario
-                    # print("Escolha mais ecológica") -> Fazer função que atribua os valores
-                    # print("Entrega com um veículo em específico")
-                    # TODO: Add other packages that are on the way, if location in sol = [node]
+                    print("\n1-Escolha mais rápida") # Carro, transito 2x carro, não afeta mota nem bicicleta
+                    print("2-Escolha mais económica") # Fazer função que calcule os gastos, combustível + horas*salario
+                    print("3-Escolha ecológica") # Fazer função que atribua os valores
+                    print("4-Entrega com um veículo em específico")
+                    l = int(input())
+                    vehicle = ""
+                    deliveryWeight = 0
+                    for pack in delivery:
+                        deliveryWeight += pack.getWeight()
+
+                    if l == 1:
+                        minTime = float('inf')
+                        for key, (time, tripCost) in data.items():
+                            if time < minTime and Vehicle(key).canDeliver(deliveryWeight):
+                                vehicle = key
+                                minTime = time
+                    elif l == 2:
+                        minCost = float('inf')
+                        for key, (time, tripCost) in data.items():
+                            if tripCost < minCost and Vehicle(key).canDeliver(deliveryWeight):
+                                vehicle = key
+                                minCost = tripCost
+                    elif l == 3:
+                        carbonEmission = float('inf')
+                        vehicle = ""
+                        for item in self.vehicleList:
+                            choice = Vehicle(item)
+                            if choice.canDeliver(deliveryWeight):
+                                carbonTotal = choice.getCarbonEmission() * cost
+                                if carbonTotal < carbonEmission:
+                                    carbonEmission = carbonTotal
+                                    vehicle = item
+                    elif l == 4:
+                        print("Opções dispovíveis:")
+                        options = []
+                        for item in self.vehicleList:
+                            if Vehicle(item).canDeliver(deliveryWeight):
+                                print(item)
+                                options.append(item)
+                        print("Insira a sua escolha:")
+                        vehicle = input()
+                        if vehicle not in options:
+                            print(f"{vehicle} não existe, tente novamente")
+                            # Mandá-lo para trás
+                    else:
+                        print("Escolha inválida, tente novamente")
+                        # TODO: Mandá-lo de volta
+
+                    print(f"A entregar a encomenda com {vehicle}, confirma?")
+                    print("1-Sim\n0-Não")
+                    l = int(input())
+                    if l == 1:
+                        self.deliver(delivery, courierID, vehicle)  # TODO: Definir a função deliver
+                    else:
+                        pass  # Voltar a escolher as coisas
+
+
                     # TODO: Add check for bad input, if not an int
                     # TODO: When delivered, add a price depending on the rush and the delivery method
                 else:

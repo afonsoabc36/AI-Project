@@ -15,14 +15,17 @@ class Vehicle:
             self.maxWeight = 5
             self.averageSpeed = 10
             self.costPerKm = 0
+            self.carbonEmissionPerMin = 0.013  # Emitido pelo entregador pelo esforço extra
         elif self.vehicleType == "Motorcycle":
             self.maxWeight = 20
             self.averageSpeed = 35
             self.costPerKm = 2.5 * 1.6 / 100
+            self.carbonEmissionPerMin = 0.077
         else:  # self.vehicleType == "Car"
             self.maxWeight = 100
             self.averageSpeed = 50
             self.costPerKm = 5.6 * 1.6 / 100
+            self.carbonEmissionPerMin = 0.1546
         if self.maxWeight > self.totalMaxWeight:
             self.totalMaxWeight = self.maxWeight
 
@@ -41,9 +44,21 @@ class Vehicle:
     def validateWeightCapacity(self, packageWeight):
         return packageWeight <= self.maxWeight
 
+    # Calcula o custo monetário para o negócio de cada entrega
     def getTripCost(self, distance, timeSpent, wagePerHour):
         return distance * self.costPerKm + timeSpent * wagePerHour
 
     def getTotalMaxWeight(self):
         return self.totalMaxWeight
 
+    def getVehicleType(self):
+        return self.vehicleType
+
+    def getCarbonEmission(self):
+        return self.carbonEmissionPerMin
+
+    def canDeliver(self, packageWeight):
+        if packageWeight <= self.maxWeight:
+            return True
+        else:
+            return False
