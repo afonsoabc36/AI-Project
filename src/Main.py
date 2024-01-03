@@ -330,6 +330,7 @@ class Main:
                                 if tripCost < minCost and Vehicle(key).canDeliver(deliveryWeight):
                                     vehicle = key
                                     minCost = tripCost
+                            break
                         elif l == 3:
                             carbonEmission = float('inf')
                             vehicle = ""
@@ -359,7 +360,7 @@ class Main:
                         else:
                             print("Escolha inválida, tente novamente")
 
-                    if self.onTime(delivery, sol):
+                    if not (self.onTime(delivery, sol, vehicle)):
                         print("Este método de envio faz com que o pacote não chegue a horas, quer continuar?")
                         print("1-Sim")
                         print("0-Não")
@@ -420,23 +421,27 @@ class Main:
             package.setCourier(courierID)
             self.deliveredPackages[packageID] = package
 
-    def timeToEachLocation(self, path, listOfDestinations):
+    def timeToEachLocation(self, path, listOfDestinations,item,delivery):
         dictionary = {}
         counter = 0
         for destination in listOfDestinations:
-            _, cost = self.graph.procura_aStar(destination, 'Gualtar')
-            dictionary[destination] = cost + counter
+            sol, cost = self.graph.procura_aStar(destination, 'Gualtar')
+            vehicle = Vehicle(item)
+            time = round(self.graph.calculaTempoVeiculo(sol, vehicle, delivery), 2)
+            hours = int(time)
+            minutes = int((time - hours) * 60)
+            dictionary[destination] = minutes + counter
             counter += 2
         return dictionary
 
-    def onTime(self, delivery, solution):
+    def onTime(self, delivery, solution, vehicle):
         stops = []
         for package in delivery:
             destination = package.getDestination()
             if destination not in stops:
                 stops.append(destination)
 
-        arrivalTime = self.timeToEachLocation(solution, stops)
+        arrivalTime = self.timeToEachLocation(solution, stops, vehicle,delivery)
 
         onTime = True
         for package in delivery:

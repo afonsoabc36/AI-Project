@@ -128,7 +128,7 @@ class Graph:
             i = i + 1
         return custo
 
-    def calculaTempoVeiculo(self, sol, veiculo, packages, stops=1):
+    def calculaTempoVeiculo(self, sol, veiculo, packages, stops=0):
         weight = 0
         # TODO: Calcular o n de paragens através do sol e dos packages
         for package in packages:
