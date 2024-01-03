@@ -12,7 +12,8 @@ class Main:
         self.graph = Graph()
         self.graph.loadFromFile('braga.csv')
         self.couriers = loadCouriers()
-        self.packages = loadPackages()
+        self.time = '29/12/2023T09:00'
+        self.packages = self.loadPackages()
         self.deliveredPackages = {}
         self.vehicleList = ['Bicycle', 'Motorcycle', 'Car']
         self.courierWage = 4.32
@@ -24,10 +25,11 @@ class Main:
             print("2-Opções sobre o grafo")
             print("3-Algoritmos de procura")
             print("4-Imprimir estafetas")
-            print("5-Imprimir pacotes")
-            print("6-Associar encomendas a um estafeta")
-            print("7-Entregar uma encomenda")
-            print("8-Avaliar uma entrega")
+            print("5-Imprimir pacotes por entregar")
+            print("6-Imprimir pacotes entregues")
+            print("7-Associar encomendas a um estafeta")
+            print("8-Entregar uma encomenda")
+            print("9-Avaliar uma entrega")
             print("0-Sair")
 
             try:
@@ -61,6 +63,9 @@ class Main:
                     print("2-Desenhar Grafo")
                     print("3-Imprimir nodos do Grafo")
                     print("4-Imprimir arestas do Grafo")
+                    print("5-Adicionar congestionamento")
+                    print("6-Adicionar estradas cortadas")
+                    print("7-Adicionar ligação")
                     print("0-Sair")
                     exit1 = 1
                     while exit1 != 0:
@@ -73,6 +78,73 @@ class Main:
                             print(self.graph.m_graph.keys())
                         elif exit1 == 4:
                             print(self.graph.imprime_aresta())
+                        elif exit1 == 5:
+                            wrongLocations = True
+                            while wrongLocations:
+                                inicio = input("Nodo 1 -> ")
+                                fim = input("Nodo 2 -> ")
+                                if Node(inicio) in self.graph.m_nodes and Node(fim) in self.graph.m_nodes:
+                                    wrongLocations = False
+                                if Node(inicio) not in self.graph.m_nodes:
+                                    print(f"{inicio} não é uma localização no grafo, insira outro local")
+                                if Node(fim) not in self.graph.m_nodes:
+                                    print(f"{fim} não é uma localização no grafo, insira outro local")
+
+                            while True:
+                                print("Insira o nível de congestionamento")
+                                print("1-Leve")
+                                print("2-Médio")
+                                print("3-Elevado")
+                                l = int(input())
+
+                                if 0 < l < 4:
+                                    if not (self.graph.addTraffic(l,inicio,fim)):
+                                        print(f"Não há ligação direta entre {inicio} e {fim}")
+                                    break
+                                else:
+                                    print("Valor inválido. Tente novamente")
+                        elif exit1 == 6:
+                            wrongLocations = True
+                            while wrongLocations:
+                                inicio = input("Nodo 1 -> ")
+                                fim = input("Nodo 2 -> ")
+                                if Node(inicio) in self.graph.m_nodes and Node(fim) in self.graph.m_nodes:
+                                    wrongLocations = False
+                                if Node(inicio) not in self.graph.m_nodes:
+                                    print(f"{inicio} não é uma localização no grafo, insira outro local")
+                                if Node(fim) not in self.graph.m_nodes:
+                                    print(f"{fim} não é uma localização no grafo, insira outro local")
+
+                            if not (self.graph.blockRoad(inicio,fim)):
+                                print("Não há ligação direta ou a remoção isola um dos nodos, quer continuar?")
+                                print("1-Sim")
+                                print("0-Não")
+                                l = int(input())
+                                if l == 1:
+                                    self.graph.blockRoad(inicio,fim,True)
+                            else:
+                                print(f"Ligação entre {inicio} e {fim} removida")
+                        elif exit1 == 7:
+                            wrongLocations = True
+                            while wrongLocations:
+                                inicio = input("Nodo 1 -> ")
+                                fim = input("Nodo 2 -> ")
+                                if Node(inicio) in self.graph.m_nodes and Node(fim) in self.graph.m_nodes:
+                                    wrongLocations = False
+                                if Node(inicio) not in self.graph.m_nodes:
+                                    print(f"{inicio} não é uma localização no grafo, insira outro local")
+                                if Node(fim) not in self.graph.m_nodes:
+                                    print(f"{fim} não é uma localização no grafo, insira outro local")
+
+                            weight = int(input("Insira a distância entre os nodos: "))
+                            while True:
+                                if weight > 0:
+                                    self.graph.add_edge(inicio, fim, weight)
+                                    print(f"Ligação entre {inicio} e {fim} com peso {weight} inserida com sucesso")
+                                    break
+                                else:
+                                    print("Insira um valor superior a 0")
+
                     l = input("Prima Enter para continuar")
                 elif saida == 3:
                     wrongLocations = True
@@ -119,13 +191,18 @@ class Main:
                     l = input("Prima Enter para continuar")
                 elif saida == 4:
                     for courier in self.couriers.values():
-                        print(f"{courier.getName()};{courier.getNumber()};{courier.getRating()};{courier.getVehicle()};Free:{courier.getFree()}")
+                        print(
+                            f"{courier.getName()};{courier.getNumber()};{courier.getRating()};{courier.getVehicle()};Free:{courier.getFree()}")
                     l = input("Prima Enter para continuar")
                 elif saida == 5:
                     for package in self.packages.values():
-                        print(f"{package.getId()};{package.getWeight()};{package.getVolume()};{package.getDeliveryDate()};{package.getPrice()};{package.getDestination()}")
+                        print(package)
                     l = input("Prima Enter para continuar")
                 elif saida == 6:
+                    for package in self.deliveredPackages.values():
+                        print(package)
+                    l = input("Prima Enter para continuar")
+                elif saida == 7:
                     for package in self.packages.values():
                         print(package)
                     print("Insira o número das encomendas que quer associar 1 a 1, insira -1 para parar")
@@ -153,7 +230,7 @@ class Main:
                             aux = False
                         else:
                             print("ID inválido, insira novamente")
-                elif saida == 7:
+                elif saida == 8:
                     print("Insira o ID do estafeta:")
                     for courier in self.couriers.values():
                         print(courier)
@@ -198,6 +275,7 @@ class Main:
 
                     if aux:
                         print("Deseja entregar outras encomendas pelo caminho?")
+                        print("Nota, isto pode causar atrasos na entrega da encomenda que pretende entregar")
                         print("1-Sim")
                         print("0-Não")
                         l = int(input())
@@ -207,7 +285,8 @@ class Main:
                                 if package.getPackageId() == packageID:
                                     continue
                                 possibleWeight = totalWeight + package.getWeight()
-                                if package.getDestination() in sol and possibleWeight < Vehicle('Car').getTotalMaxWeight():
+                                if package.getDestination() in sol and possibleWeight < Vehicle(
+                                        'Car').getTotalMaxWeight():
                                     delivery.append(package)
                         tamanho = len(delivery)
                         if tamanho > 1:
@@ -232,9 +311,9 @@ class Main:
                         deliveryWeight += pack.getWeight()
 
                     while True:
-                        print("\n1-Escolha mais rápida") # Carro, transito 2x carro, não afeta mota nem bicicleta
-                        print("2-Escolha mais económica") # Fazer função que calcule os gastos, combustível + horas*salario
-                        print("3-Escolha ecológica") # Fazer função que atribua os valores
+                        print("\n1-Escolha mais rápida")
+                        print("2-Escolha mais económica")
+                        print("3-Escolha ecológica")
                         print("4-Entrega com um veículo em específico")
                         l = int(input())
 
@@ -251,7 +330,6 @@ class Main:
                                 if tripCost < minCost and Vehicle(key).canDeliver(deliveryWeight):
                                     vehicle = key
                                     minCost = tripCost
-                            break
                         elif l == 3:
                             carbonEmission = float('inf')
                             vehicle = ""
@@ -281,6 +359,14 @@ class Main:
                         else:
                             print("Escolha inválida, tente novamente")
 
+                    if self.onTime(delivery, sol):
+                        print("Este método de envio faz com que o pacote não chegue a horas, quer continuar?")
+                        print("1-Sim")
+                        print("0-Não")
+                        l = int(input())
+                        if l == 0:
+                            continue
+
                     print(f"A entregar a encomenda com {vehicle}, confirma?")
                     print("1-Sim")
                     print("0-Não")
@@ -294,7 +380,7 @@ class Main:
                             break
                         else:
                             print("Escolha inválida, tente novamente")
-                elif saida == 8:
+                elif saida == 9:
                     while True:
                         print("Insira o número da encomenda a avaliar:")
                         for package in self.deliveredPackages.values():
@@ -334,6 +420,63 @@ class Main:
             package.setCourier(courierID)
             self.deliveredPackages[packageID] = package
 
+    def timeToEachLocation(self, path, listOfDestinations):
+        dictionary = {}
+        counter = 0
+        for destination in listOfDestinations:
+            _, cost = self.graph.procura_aStar(destination, 'Gualtar')
+            dictionary[destination] = cost + counter
+            counter += 2
+        return dictionary
+
+    def onTime(self, delivery, solution):
+        stops = []
+        for package in delivery:
+            destination = package.getDestination()
+            if destination not in stops:
+                stops.append(destination)
+
+        arrivalTime = self.timeToEachLocation(solution, stops)
+
+        onTime = True
+        for package in delivery:
+            if not (package.arriveOnTime(arrivalTime[package.getDestination()], self.time)):
+                onTime = False
+                break
+
+        return onTime
+
+    def loadPackages(self):
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_directory, '..', 'db', 'packages.csv')
+        packages = {}  # TODO: HashMap may not be the best, maybe sorted array by destination or due date
+
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            # Ler o packageId do csv e atualizar quando o programa fechar
+            # next(reader, None) para ignorar uma linha vazia
+            packageIdLine = next(reader, None)
+            if packageIdLine and len(packageIdLine) == 1:
+                Package.packageId = int(packageIdLine[0])
+            else:
+                print("Error in reading the package id")
+                return packages
+
+            next(reader, None)  # Para não inserir o header
+
+            for row in reader:
+                if len(row) == 4:
+                    weight, volume, deliveryDate, destination = row
+                    # TODO: Maybe inserir bool de delivered ou não
+                    weight = float(weight)
+                    volume = float(volume)
+                    packageId = Package.getPackageId()
+                    packages[packageId] = Package(packageId, weight, volume, deliveryDate, destination, self.time)
+                else:
+                    print(f"Ignoring invalid row: {row}")
+
+            return packages
+
 
 def loadCouriers():
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -355,38 +498,6 @@ def loadCouriers():
                 print(f"Ignoring invalid row: {row}")
 
         return couriers
-
-
-def loadPackages():
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_directory, '..', 'db', 'packages.csv')
-    packages = {}  # TODO: HashMap may not be the best, maybe sorted array by destination or due date
-
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        # Ler o packageId do csv e atualizar quando o programa fechar
-        # next(reader, None) para ignorar uma linha vazia
-        packageIdLine = next(reader, None)
-        if packageIdLine and len(packageIdLine) == 1:
-            Package.packageId = int(packageIdLine[0])
-        else:
-            print("Error in reading the package id")
-            return packages
-
-        next(reader, None)  # Para não inserir o header
-
-        for row in reader:
-            if len(row) == 4:
-                weight, volume, deliveryDate, destination = row
-                # TODO: Maybe inserir bool de delivered ou não
-                weight = float(weight)
-                volume = float(volume)
-                packageId = Package.getPackageId()
-                packages[packageId] = Package(packageId, weight, volume, deliveryDate, destination)
-            else:
-                print(f"Ignoring invalid row: {row}")
-
-        return packages
 
 
 if __name__ == "__main__":

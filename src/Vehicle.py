@@ -16,16 +16,19 @@ class Vehicle:
             self.averageSpeed = 10
             self.costPerKm = 0
             self.carbonEmissionPerMin = 0.013  # Emitido pelo entregador pelo esforço extra
+            self.pricePerKmToCustomer = 0.07
         elif self.vehicleType == "Motorcycle":
             self.maxWeight = 20
             self.averageSpeed = 35
             self.costPerKm = 2.5 * 1.6 / 100
             self.carbonEmissionPerMin = 0.077
+            self.pricePerKmToCustomer = 0.15
         else:  # self.vehicleType == "Car"
             self.maxWeight = 100
             self.averageSpeed = 50
             self.costPerKm = 5.6 * 1.6 / 100
             self.carbonEmissionPerMin = 0.1546
+            self.pricePerKmToCustomer = 0.25
         if self.maxWeight > self.totalMaxWeight:
             self.totalMaxWeight = self.maxWeight
 
@@ -62,3 +65,6 @@ class Vehicle:
             return True
         else:
             return False
+
+    def getPriceToCostumer(self):
+        return self.pricePerKmToCustomer

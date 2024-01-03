@@ -143,9 +143,44 @@ class Graph:
                 listaA = listaA + nodo + " -> " + nodo2 + "  custo: " + str(custo) + ("\n")
         return listaA
 
+    def addTraffic(self, level, inicio, fim):
+        if inicio in self.m_graph.keys():
+            print("Aqui")
+            for node, weight in self.m_graph[inicio]:
+                if node == fim:
+                    print("Aqui2")
+                    self.m_graph[inicio].remove((node, weight))
+                    self.m_graph[inicio].add((node, weight * (level + 1)))
+                    return True
+        elif fim in self.m_graph.keys():
+            for node, weight in self.m_graph[fim]:
+                if node == inicio:
+                    self.m_graph[fim].remove((node, weight))
+                    self.m_graph[fim].add((node, weight * (level + 1)))
+                    return True
+        return False
+
+    def blockRoad(self, inicio, fim, second=False):
+        if not second and inicio in self.m_graph and len(self.m_graph[inicio]) == 1 and list(self.m_graph[inicio])[0][0] == fim:
+            return False
+
+        if not second and fim in self.m_graph and len(self.m_graph[fim]) == 1 and list(self.m_graph[fim])[0][0] == inicio:
+            return False
+
+        if inicio in self.m_graph:
+            for node, weight in self.m_graph[inicio].copy():
+                if node == fim:
+                    self.m_graph[inicio].remove((node, weight))
+
+        if fim in self.m_graph:
+            for node, weight in self.m_graph[fim].copy():
+                if node == inicio:
+                    self.m_graph[fim].remove((node, weight))
+
+        return True
+
     def desenha(self):
         lista_v = self.m_nodes
-        lista_a = []
         g = nx.Graph()
 
         for nodo in lista_v:
@@ -205,7 +240,6 @@ class Graph:
 
         # Return the best solution and cost
         return bestSol, bestCusto
-
 
     ######################################################
     # Procura DFS
