@@ -272,7 +272,7 @@ class Main:
                         if package.getDestination() in sol:
                             aux = True
                             break
-
+                    tamanho = 1
                     if aux:
                         print("Deseja entregar outras encomendas pelo caminho?")
                         print("Nota, isto pode causar atrasos na entrega da encomenda que pretende entregar")
@@ -302,7 +302,7 @@ class Main:
                         data[item] = (time, tripCost)
                         hours = int(time)
                         minutes = int((time - hours) * 60)
-                        print(f"Time with {item}: {hours}h{minutes}m")
+                        print(f"Time expected with {item}: {hours}h{minutes}m")
                         print(f"Cost of the trip: {tripCost}")
 
                     vehicle = ""
@@ -421,7 +421,7 @@ class Main:
             package.setCourier(courierID)
             self.deliveredPackages[packageID] = package
 
-    def timeToEachLocation(self, path, listOfDestinations,item,delivery):
+    def timeToEachLocation(self, path, listOfDestinations, item, delivery):
         dictionary = {}
         counter = 0
         for destination in listOfDestinations:
